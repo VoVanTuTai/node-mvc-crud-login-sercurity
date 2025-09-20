@@ -1,0 +1,22 @@
+<%- include("partials/header") %>
+<h2>Danh sách sản phẩm</h2>
+
+<form method="get" action="/products">
+  <input type="text" name="search" placeholder="Tìm sản phẩm..." />
+  <select name="supplier">
+    <option value="">-- Nhà cung cấp --</option>
+    <% suppliers.forEach(s => { %>
+      <option value="<%= s._id %>"><%= s.name %></option>
+    <% }) %>
+  </select>
+  <button type="submit">Tìm</button>
+</form>
+
+<ul>
+  <% products.forEach(p => { %>
+    <li><%= p.name %> - <%= p.price %> VNĐ (Cung cấp bởi: <%= p.supplierId?.name %>)</li>
+  <% }) %>
+</ul>
+
+<%- include("partials/footer") %>
+

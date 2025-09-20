@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+
+<h2 class="mb-3"><%= product ? "Chỉnh sửa Sản phẩm" : "Thêm Sản phẩm" %></h2>
+
+<form method="POST" action="<%= product ? '/products/edit/' + product._id : '/products/add' %>">
+  <div class="mb-3">
+    <label class="form-label">Tên sản phẩm</label>
+    <input type="text" name="name" class="form-control"
+           value="<%= product ? product.name : '' %>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Giá</label>
+    <input type="number" name="price" class="form-control"
+           value="<%= product ? product.price : '' %>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Số lượng</label>
+    <input type="number" name="quantity" class="form-control"
+           value="<%= product ? product.quantity : '' %>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Nhà cung cấp</label>
+    <select name="supplier" class="form-select" required>
+      <option value="">-- Chọn nhà cung cấp --</option>
+      <% suppliers.forEach(s => { %>
+        <option value="<%= s._id %>"
+          <%= product && product.supplier && product.supplier.equals(s._id) ? "selected" : "" %>>
+          <%= s.name %>
+        </option>
+      <% }) %>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-success">Lưu</button>
+  <a href="/products" class="btn btn-secondary">Hủy</a>
+</form>
+
+<%- include('../partials/footer') %>
+
