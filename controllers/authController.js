@@ -1,72 +1,70 @@
-const User = require("../models/User");
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+const User = require('../models/User');
 
-// Hiển thị form login
-exports.getLogin = (req, res) => {
-  res.render("login", { error: null });
+// Hiển thị form đăng ký
+exports.getRegisterForm = (req, res) => {
+    res.render('register', { title: 'Đăng ký tài khoản' });
 };
 
-// Xử lý login
-exports.postLogin = async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-
-  if (user && await bcrypt.compare(password, user.password)) {
-    req.session.user = user;
-    return res.redirect("/");
-  }
-  res.render("login", { error: "Sai tài khoản hoặc mật khẩu" });
-};
-
-// Hiển thị form register
-exports.getRegister = (req, res) => {
-  res.render("register", { error: null });
-};
-
-// Xử lý đăng ký
+// Xử lý đăng ký người dùng mới
 exports.postRegister = async (req, res) => {
-  const { username, password, email, phone } = req.body;
-  try {
-    const existing = await User.findOne({ username });
-    if (existing) {
-      return res.render("register", { error: "Tên đăng nhập đã tồn tại" });
+    try {
+        const { username, email, phone, password } = req.body;
+
+        // Kiểm tra xem username hoặc email đã tồn tại chưa
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) {
+            // Tạm thời chỉ gửi lỗi, sau này sẽ cải thiện với flash messages
+            return res.status(400).send('Tên đăng nhập hoặc email đã tồn tại.');
+        }
+
+        const user = new User({ username, email, phone, password });
+        await user.save(); // Mật khẩu được mã hóa tự động nhờ middleware trong model
+
+        res.redirect('/login'); // Chuyển hướng đến trang đăng nhập sau khi đăng ký thành công
+    } catch (error) {
+        // Xử lý lỗi validation hoặc lỗi server
+        console.error(error);
+        res.status(500).send('Đã có lỗi xảy ra. Vui lòng thử lại.');
     }
-
-    const user = new User({ username, password, email, phone });
-    await user.save();
-    res.redirect("/auth/login");
-  } catch (err) {
-    console.error(err);
-    res.render("register", { error: "Lỗi đăng ký, vui lòng thử lại" });
-  }
 };
 
-// Hiển thị form quên mật khẩu
-exports.getForgot = (req, res) => {
-  res.render("forgot", { message: null });
+// Hiển thị form đăng nhập
+exports.getLoginForm = (req, res) => {
+    res.render('login', { title: 'Đăng nhập' });
 };
 
-// Xử lý quên mật khẩu (tạo token reset)
-exports.postForgot = async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
+// Xử lý đăng nhập
+exports.postLogin = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
 
-  if (!user) {
-    return res.render("forgot", { message: "Không tìm thấy email" });
-  }
+        // Nếu không tìm thấy user hoặc mật khẩu không khớp
+        if (!user || !(await user.comparePassword(password))) {
+            return res.status(401).send('Tên đăng nhập hoặc mật khẩu không chính xác.');
+        }
 
-  // Tạo reset token bằng crypto thay cho uuid
-  const resetToken = crypto.randomBytes(20).toString("hex");
+        // Lưu user ID vào session để duy trì trạng thái đăng nhập
+        req.session.userId = user._id;
 
-  // (Bạn có thể lưu resetToken này vào DB kèm thời gian hết hạn)
-  console.log("Reset token cho", email, ":", resetToken);
-
-  res.render("forgot", { message: "Mã khôi phục đã được tạo (xem console)" });
+        res.redirect('/'); // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Đã có lỗi xảy ra. Vui lòng thử lại.');
+    }
 };
 
-// Logout
+// Xử lý đăng xuất
 exports.logout = (req, res) => {
-  req.session.destroy();
-  res.redirect("/auth/login");
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).send('Không thể đăng xuất. Vui lòng thử lại.');
+        }
+        res.redirect('/login'); // Chuyển hướng về trang đăng nhập sau khi đăng xuất
+    });
+};
+
+// TODO: Xây dựng chức năng quên mật khẩu
+exports.getForgotPasswordForm = (req, res) => {
+    res.render('forgot', { title: 'Quên mật khẩu' });
 };

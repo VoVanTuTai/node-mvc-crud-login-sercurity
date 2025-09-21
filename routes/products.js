@@ -1,58 +1,25 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Product = require("../models/Product");
-const Supplier = require("../models/Supplier");
+const productController = require('../controllers/productController');
+const authMiddleware = require('../middleware/auth');
 
-// 📌 Danh sách sản phẩm
-router.get("/", async (req, res) => {
-  const products = await Product.find().populate("supplier");
-  res.render("products/index", { products });
-});
+// Tất cả các route trong file này sẽ yêu cầu đăng nhập
+// Tiền tố /admin/products được định nghĩa trong app.js
+// URL đầy đủ sẽ là /admin/products/
 
-// 📌 Form thêm sản phẩm
-router.get("/add", async (req, res) => {
-  const suppliers = await Supplier.find();
-  res.render("products/form", { product: null, suppliers });
-});
+// GET /admin/products -> Hiển thị danh sách sản phẩm
+router.get('/', authMiddleware.isAuthenticated, productController.getProductListAdmin);
 
-// 📌 Xử lý thêm sản phẩm
-router.post("/add", async (req, res) => {
-  try {
-    await Product.create(req.body);
-    res.redirect("/products");
-  } catch (err) {
-    console.error(err);
-    res.send("Lỗi khi thêm sản phẩm!");
-  }
-});
+// GET /admin/products/add -> Hiển thị form thêm mới
+router.get('/add', authMiddleware.isAuthenticated, productController.getProductForm);
 
-// 📌 Form sửa sản phẩm
-router.get("/edit/:id", async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  const suppliers = await Supplier.find();
-  res.render("products/form", { product, suppliers });
-});
+// GET /admin/products/edit/:id -> Hiển thị form chỉnh sửa
+router.get('/edit/:id', authMiddleware.isAuthenticated, productController.getProductForm);
 
-// 📌 Xử lý sửa sản phẩm
-router.post("/edit/:id", async (req, res) => {
-  try {
-    await Product.findByIdAndUpdate(req.params.id, req.body);
-    res.redirect("/products");
-  } catch (err) {
-    console.error(err);
-    res.send("Lỗi khi cập nhật sản phẩm!");
-  }
-});
+// POST /admin/products/add hoặc /admin/products/edit/:id -> Xử lý lưu dữ liệu
+router.post(['/add', '/edit/:id'], authMiddleware.isAuthenticated, productController.postProduct);
 
-// 📌 Xóa sản phẩm
-router.get("/delete/:id", async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.redirect("/products");
-  } catch (err) {
-    console.error(err);
-    res.send("Lỗi khi xóa sản phẩm!");
-  }
-});
+// POST /admin/products/delete/:id -> Xử lý xóa
+router.post('/delete/:id', authMiddleware.isAuthenticated, productController.deleteProduct);
 
 module.exports = router;

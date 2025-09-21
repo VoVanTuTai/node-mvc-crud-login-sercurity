@@ -1,16 +1,23 @@
-<%- include("./partials/header") %>
+<%- include('partials/header') %>
 
-<div class="container mt-4">
-  <h2>Quên mật khẩu</h2>
-  <form method="POST" action="/auth/forgot">
-    <div class="mb-3">
-      <label class="form-label">Nhập email</label>
-      <input type="email" name="email" class="form-control" required>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3><%= title %></h3>
+            </div>
+            <div class="card-body">
+                <p>Chức năng này đang được phát triển. Vui lòng quay lại sau.</p>
+                <form>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Nhập Email của bạn</label>
+                        <input type="email" class="form-control" id="email" name="email" disabled>
+                    </div>
+                    <button type="submit" class="btn btn-primary" disabled>Gửi yêu cầu</button>
+                </form>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-warning">Lấy lại mật khẩu</button>
-    <a href="/auth/login" class="btn btn-secondary">Quay lại</a>
-  </form>
 </div>
 
-<%- include("./partials/footer") %>
-
+<%- include('partials/footer') %>

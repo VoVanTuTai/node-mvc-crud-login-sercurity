@@ -1,24 +1,26 @@
-<%- include("../partials/header") %>
+<%- include('../partials/header') %>
 
-<div class="container mt-4">
-  <h2><%= supplier ? "Sửa" : "Thêm" %> nhà cung cấp</h2>
+<h1><%= title %></h1>
 
-  <form method="POST" action="<%= supplier ? '/suppliers/edit/' + supplier._id : '/suppliers/add' %>">
+<% 
+    const actionUrl = supplier ? `/admin/suppliers/edit/${supplier._id}` : '/admin/suppliers/add';
+%>
+
+<form action="<%= actionUrl %>" method="POST">
     <div class="mb-3">
-      <label class="form-label">Tên</label>
-      <input type="text" name="name" class="form-control" value="<%= supplier ? supplier.name : '' %>" required>
+        <label for="name" class="form-label">Tên nhà cung cấp</label>
+        <input type="text" class="form-control" id="name" name="name" value="<%= supplier ? supplier.name : '' %>" required>
     </div>
     <div class="mb-3">
-      <label class="form-label">Địa chỉ</label>
-      <input type="text" name="address" class="form-control" value="<%= supplier ? supplier.address : '' %>" required>
+        <label for="address" class="form-label">Địa chỉ</label>
+        <input type="text" class="form-control" id="address" name="address" value="<%= supplier ? supplier.address : '' %>" required>
     </div>
     <div class="mb-3">
-      <label class="form-label">Số điện thoại</label>
-      <input type="text" name="phone" class="form-control" value="<%= supplier ? supplier.phone : '' %>" required>
+        <label for="phone" class="form-label">Số điện thoại</label>
+        <input type="tel" class="form-control" id="phone" name="phone" value="<%= supplier ? supplier.phone : '' %>" required>
     </div>
     <button type="submit" class="btn btn-success">Lưu</button>
-    <a href="/suppliers" class="btn btn-secondary">Quay lại</a>
-  </form>
-</div>
+    <a href="/admin/suppliers" class="btn btn-secondary">Hủy</a>
+</form>
 
-<%- include("../partials/footer") %>
+<%- include('../partials/footer') %>

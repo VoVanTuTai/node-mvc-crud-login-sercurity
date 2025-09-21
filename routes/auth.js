@@ -1,74 +1,26 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const User = require("../models/User");
-const crypto = require("crypto");
+const authController = require('../controllers/authController');
 
-// 📌 Trang đăng ký
-router.get("/register", (req, res) => {
-  res.render("auth/register");
-});
+// Hiển thị form đăng ký
+router.get('/register', authController.getRegisterForm);
 
-router.post("/register", async (req, res) => {
-  try {
-    const { username, password, email, phone } = req.body;
-    const user = new User({ username, password, email, phone });
-    await user.save();
-    res.redirect("/auth/login");
-  } catch (err) {
-    console.error(err);
-    res.send("Lỗi đăng ký!");
-  }
-});
+// Xử lý POST request từ form đăng ký
+router.post('/register', authController.postRegister);
 
-// 📌 Trang đăng nhập
-router.get("/login", (req, res) => {
-  res.render("auth/login");
-});
+// Hiển thị form đăng nhập
+router.get('/login', authController.getLoginForm);
 
-router.post("/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username, password });
-    if (!user) return res.send("Sai tài khoản hoặc mật khẩu!");
+// Xử lý POST request từ form đăng nhập
+router.post('/login', authController.postLogin);
 
-    req.session.user = user;
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.send("Lỗi đăng nhập!");
-  }
-});
+// Xử lý đăng xuất
+router.get('/logout', authController.logout);
 
-// 📌 Đăng xuất
-router.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/auth/login");
-});
+// Hiển thị form quên mật khẩu
+router.get('/forgot-password', authController.getForgotPasswordForm);
 
-// 📌 Quên mật khẩu
-router.get("/forgot", (req, res) => {
-  res.render("auth/forgot");
-});
-
-router.post("/forgot", async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.send("Không tìm thấy email!");
-
-    // Sinh password mới tạm thời
-    const newPassword = crypto.randomBytes(4).toString("hex");
-    user.password = newPassword;
-    await user.save();
-
-    // Thực tế sẽ gửi mail, ở đây mình in ra console
-    console.log(`🔑 Mật khẩu mới của ${email}: ${newPassword}`);
-
-    res.send("Mật khẩu mới đã được reset. Vui lòng kiểm tra console!");
-  } catch (err) {
-    console.error(err);
-    res.send("Lỗi reset mật khẩu!");
-  }
-});
+// TODO: Xử lý POST request cho chức năng quên mật khẩu
+// router.post('/forgot-password', authController.postForgotPassword);
 
 module.exports = router;

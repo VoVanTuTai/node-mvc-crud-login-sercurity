@@ -1,18 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Product = require("../models/Product");
-const Supplier = require("../models/Supplier");
+const productController = require('../controllers/productController');
 
-router.get("/", async (req, res) => {
-  const { search, supplier } = req.query;
-  let query = {};
-  if (search) query.name = new RegExp(search, "i");
-  if (supplier) query.supplierId = supplier;
+// Route cho trang chủ
+// GET / -> Hiển thị danh sách sản phẩm với bộ lọc và tìm kiếm
+router.get('/', productController.getHomePage);
 
-  const products = await Product.find(query).populate("supplierId");
-  const suppliers = await Supplier.find();
-
-  res.render("index", { products, suppliers, user: req.session.user });
-});
-
-module.exports = router;   // <- quan trọng
+module.exports = router;
